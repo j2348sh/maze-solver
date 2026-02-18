@@ -46,7 +46,7 @@ if mode == "🎲 미로 생성":
         if st.session_state.get("gen_result") is not None:
             res = st.session_state.gen_result
             st.image(cv2.cvtColor(res, cv2.COLOR_BGR2RGB), use_container_width=True)
-            st.success(f"✅ {st.session_state.gen_info}")
+            st.success("✅ 미로 풀이 완료!")
             _, dl = cv2.imencode('.png', res)
             st.download_button("📥 풀이 결과 다운로드", dl.tobytes(), "maze_solved.png", "image/png")
         else:
@@ -104,7 +104,7 @@ else:
         if st.session_state.auto_result is not None:
             result_rgb = cv2.cvtColor(st.session_state.auto_result, cv2.COLOR_BGR2RGB)
             st.image(result_rgb, use_container_width=True)
-            st.success(f"✅ {st.session_state.auto_info}")
+            st.success("✅ 미로 풀이 완료!")
             _, buf = cv2.imencode('.png', st.session_state.auto_result)
             st.download_button("📥 결과 다운로드", buf.tobytes(), f"solved_{uploaded.name}", "image/png")
         else:
@@ -119,7 +119,7 @@ else:
                     # 풀이 성공
                     bc1, bc2, bc3 = st.columns([5, 1.5, 1.5])
                     with bc1:
-                        st.success(f"✅ {st.session_state.get('manual_info', '')}")
+                        st.success("✅ " + st.session_state.get("manual_info", "미로 풀이 완료!"))
                     with bc2:
                         _, buf = cv2.imencode('.png', st.session_state.manual_result)
                         st.download_button("📥 다운로드", buf.tobytes(), f"solved_{uploaded.name}", "image/png", use_container_width=True)
@@ -203,7 +203,7 @@ else:
                             override_scale=s, override_blur=b)
                         if res is not None:
                             st.session_state.manual_result = res
-                            st.session_state.manual_info = f"성공 ({lbl}): {info}"
+                            st.session_state.manual_info = "미로 풀이 완료!"
                             status.empty(); progress.empty()
                             solved = True; st.rerun(); break
                     if not solved:

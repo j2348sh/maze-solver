@@ -470,5 +470,5 @@ def solve_maze(img_bytes, manual_start=None, manual_end=None, override_scale=Non
     for y,x in kp:
         cv2.circle(result, (x,y), line_thickness//2, (0,0,255), -1, cv2.LINE_AA)
 
-    info = f"경로 길이: {len(path)}, 선 두께: {line_thickness}px"
+    info = "미로 풀이 완료!"
     return result, info
