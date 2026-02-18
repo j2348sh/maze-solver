@@ -17,11 +17,7 @@ div[data-testid="stHorizontalBlock"] button {
     padding-top: 14px !important;
     padding-bottom: 14px !important;
 }
-/* 이미지 전체화면 버튼 숨김 */
-div[data-testid="stImage"] button,
-div[data-testid="StyledFullScreenButton"] {
-    display: none !important;
-}
+
 </style>
 """, unsafe_allow_html=True)
 st.title("🧩 미로 풀이기")
@@ -113,6 +109,7 @@ else:
                 _, buf = cv2.imencode('.png', st.session_state.auto_result)
                 st.download_button("📥 다운로드", buf.tobytes(), f"solved_{uploaded.name}", "image/png", use_container_width=True)
             result_rgb = cv2.cvtColor(st.session_state.auto_result, cv2.COLOR_BGR2RGB)
+            st.markdown("<br>", unsafe_allow_html=True)
             st.image(result_rgb, use_container_width=True)
         else:
             # 수동 모드
@@ -163,6 +160,7 @@ else:
             # 이미지 표시
             if st.session_state.get("manual_result") is not None:
                 res_rgb = cv2.cvtColor(st.session_state.manual_result, cv2.COLOR_BGR2RGB)
+                st.markdown("<br>", unsafe_allow_html=True)
                 st.image(res_rgb, use_container_width=True)
             else:
                 display_w = min(700, w_orig)
