@@ -20,9 +20,7 @@ if mode == "🎲 미로 생성":
         maze_w = st.slider("가로", 10, 300, 50)
     with c2:
         maze_h = st.slider("세로", 10, 300, 50)
-
-    cells = (2*maze_w+1) * (2*maze_h+1)
-    st.caption(f"미로 셀: {2*maze_w+1} x {2*maze_h+1} ({cells:,}셀)")
+    st.caption(f"미로 셀: {2*maze_w+1} x {2*maze_h+1}")
 
     if st.button("🎲 미로 생성", type="primary"):
         with st.spinner(f"{maze_w}x{maze_h} 미로 생성 중..."):
@@ -44,9 +42,6 @@ if mode == "🎲 미로 생성":
             nparr = np.frombuffer(st.session_state.gen_img_bytes, np.uint8)
             gen_img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
             st.image(cv2.cvtColor(gen_img, cv2.COLOR_BGR2RGB), use_container_width=True)
-            h, w = gen_img.shape[:2]
-            st.caption(f"이미지: {w}x{h}px")
-
             c1, c2 = st.columns(2)
             with c1:
                 if st.button("🚀 풀기", type="primary"):
@@ -102,42 +97,68 @@ else:
             _, buf = cv2.imencode('.png', st.session_state.auto_result)
             st.download_button("📥 결과 다운로드", buf.tobytes(), f"solved_{uploaded.name}", "image/png")
         else:
-            st.warning(f"자동 풀이 실패: {st.session_state.auto_info}")
-
+            # 수동 모드: 상단에 상태 + 버튼 배치
             if st.session_state.get("manual_result") is not None:
+                # 풀이 성공 상태
+                col_msg, col_btn1, col_btn2 = st.columns([3, 1, 1])
+                with col_msg:
+                    st.success(f"✅ {st.session_state.get('manual_info', '')}")
+                with col_btn1:
+                    _, buf = cv2.imencode('.png', st.session_state.manual_result)
+                    st.download_button("📥 다운로드", buf.tobytes(), f"solved_{uploaded.name}", "image/png")
+                with col_btn2:
+                    if st.button("🔄 다시"):
+                        st.session_state.points = []
+                        st.session_state.last_click = None
+                        st.session_state.manual_result = None
+                        st.rerun()
                 res_rgb = cv2.cvtColor(st.session_state.manual_result, cv2.COLOR_BGR2RGB)
                 st.image(res_rgb, use_container_width=True)
-                st.success(f"✅ {st.session_state.get('manual_info', '')}")
-                _, buf = cv2.imencode('.png', st.session_state.manual_result)
-                st.download_button("📥 결과 다운로드", buf.tobytes(), f"solved_{uploaded.name}", "image/png")
-                if st.button("🔄 다시 시도"):
-                    st.session_state.points = []
-                    st.session_state.last_click = None
-                    st.session_state.manual_result = None
-                    st.rerun()
             else:
+                # 풀이 전 상태
+                points = st.session_state.get("points", [])
+                n_points = len(points)
+
+                # 상단 바: 상태 메시지 + 버튼
+                if n_points < 2:
+                    label = "🟢 시작점 클릭" if n_points == 0 else "🔴 끝점 클릭"
+                    col_msg, col_btn = st.columns([4, 1])
+                    with col_msg:
+                        st.warning(f"자동 실패 → 수동 모드 | {label}")
+                    with col_btn:
+                        if n_points > 0 and st.button("🔄 초기화"):
+                            st.session_state.points = []
+                            st.session_state.last_click = None
+                            st.rerun()
+                else:
+                    col_msg, col_btn1, col_btn2 = st.columns([3, 1, 1])
+                    with col_msg:
+                        st.info(f"🟢 {points[0]} → 🔴 {points[1]}")
+                    with col_btn1:
+                        solve_clicked = st.button("🚀 풀기", type="primary")
+                    with col_btn2:
+                        if st.button("🔄 초기화"):
+                            st.session_state.points = []
+                            st.session_state.last_click = None
+                            st.rerun()
+
+                # 이미지 (클릭 가능)
                 display_w = min(700, w_orig)
                 scale_d = display_w / w_orig
                 display_h = int(h_orig * scale_d)
-                points = st.session_state.get("points", [])
 
                 preview = img.copy()
                 for i, (py, px) in enumerate(points[:2]):
                     color = (0, 255, 0) if i == 0 else (0, 0, 255)
-                    label = "START" if i == 0 else "END"
                     r = max(5, w_orig // 100)
                     cv2.circle(preview, (px, py), r, color, -1)
-                    cv2.putText(preview, label, (px+r+2, py+4),
+                    label_t = "S" if i == 0 else "E"
+                    cv2.putText(preview, label_t, (px+r+2, py+4),
                                 cv2.FONT_HERSHEY_SIMPLEX, max(0.4, w_orig/2000), color, 2)
                 pil_preview = Image.fromarray(cv2.cvtColor(preview, cv2.COLOR_BGR2RGB)).resize((display_w, display_h))
 
-                n_points = len(points)
-                if n_points == 0:
-                    st.info("🟢 이미지에서 시작점을 클릭하세요")
-                elif n_points == 1:
-                    st.info("🔴 이미지에서 끝점을 클릭하세요")
-
                 coords = streamlit_image_coordinates(pil_preview, key=f"click_{n_points}")
+
                 if coords and coords.get("x") is not None and coords.get("y") is not None:
                     click_x = int(coords["x"] / scale_d)
                     click_y = int(coords["y"] / scale_d)
@@ -149,37 +170,29 @@ else:
                             st.session_state.last_click = new_click
                             st.rerun()
 
-                if len(points) >= 2:
-                    st.write(f"🟢 시작: {points[0]}  🔴 끝: {points[1]}")
-                    c1, c2 = st.columns(2)
-                    with c1:
-                        if st.button("🚀 풀이 실행", type="primary"):
-                            combos = [
-                                (None, None, "기본"),
-                                (None, 3, "blur=3"), (None, 0, "blur=0"),
-                                (3, 5, "3x,b5"), (3, 3, "3x,b3"), (3, 0, "3x,b0"),
-                                (4, 5, "4x,b5"), (4, 3, "4x,b3"), (4, 0, "4x,b0"),
-                                (2, 3, "2x,b3"), (2, 0, "2x,b0"),
-                            ]
-                            progress = st.progress(0)
-                            status = st.empty()
-                            solved = False
-                            for i, (s, b, lbl) in enumerate(combos):
-                                progress.progress((i+1)/len(combos))
-                                status.text(f"시도: {lbl}...")
-                                res, info = solve_maze(img_bytes,
-                                    manual_start=points[0], manual_end=points[1],
-                                    override_scale=s, override_blur=b)
-                                if res is not None:
-                                    st.session_state.manual_result = res
-                                    st.session_state.manual_info = f"성공 ({lbl}): {info}"
-                                    status.empty(); progress.empty()
-                                    solved = True; st.rerun(); break
-                            if not solved:
-                                status.empty(); progress.empty()
-                                st.error("❌ 모든 조합 실패. 점 초기화 후 다시 시도해보세요.")
-                    with c2:
-                        if st.button("🔄 점 초기화"):
-                            st.session_state.points = []
-                            st.session_state.last_click = None
-                            st.rerun()
+                # 풀이 실행
+                if n_points >= 2 and 'solve_clicked' in dir() and solve_clicked:
+                    combos = [
+                        (None, None, "기본"),
+                        (None, 3, "blur=3"), (None, 0, "blur=0"),
+                        (3, 5, "3x,b5"), (3, 3, "3x,b3"), (3, 0, "3x,b0"),
+                        (4, 5, "4x,b5"), (4, 3, "4x,b3"), (4, 0, "4x,b0"),
+                        (2, 3, "2x,b3"), (2, 0, "2x,b0"),
+                    ]
+                    progress = st.progress(0)
+                    status = st.empty()
+                    solved = False
+                    for i, (s, b, lbl) in enumerate(combos):
+                        progress.progress((i+1)/len(combos))
+                        status.text(f"시도: {lbl}...")
+                        res, info = solve_maze(img_bytes,
+                            manual_start=points[0], manual_end=points[1],
+                            override_scale=s, override_blur=b)
+                        if res is not None:
+                            st.session_state.manual_result = res
+                            st.session_state.manual_info = f"성공 ({lbl}): {info}"
+                            status.empty(); progress.empty()
+                            solved = True; st.rerun(); break
+                    if not solved:
+                        status.empty(); progress.empty()
+                        st.error("❌ 모든 조합 실패. 초기화 후 다른 점을 찍어보세요.")
