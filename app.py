@@ -42,6 +42,7 @@ LANG = {
         "solve_btn": "🚀 풀기",
         "solving": "풀이 중...",
         "auto_solving": "자동 풀이 중...",
+        "manual_solving": "풀이 시도 중...",
         "success": "✅ 미로 풀이 완료!",
         "fail_auto": "자동 풀이 실패",
         "fail_all": "❌ 모든 조합 실패. 초기화 후 다른 점을 찍어보세요.",
@@ -79,6 +80,7 @@ LANG = {
         "solve_btn": "🚀 Solve",
         "solving": "Solving...",
         "auto_solving": "Auto-solving...",
+        "manual_solving": "Trying to solve...",
         "success": "✅ Maze solved!",
         "fail_auto": "Auto-solve failed",
         "fail_all": "❌ All attempts failed. Reset and try different points.",
@@ -285,26 +287,22 @@ else:
                 # 풀이 실행
                 if n_points >= 2 and 'solve_clicked' in dir() and solve_clicked:
                     combos = [
-                        (None, None, "기본"),
-                        (None, 3, "blur=3"), (None, 0, "blur=0"),
-                        (3, 5, "3x,b5"), (3, 3, "3x,b3"), (3, 0, "3x,b0"),
-                        (4, 5, "4x,b5"), (4, 3, "4x,b3"), (4, 0, "4x,b0"),
-                        (2, 3, "2x,b3"), (2, 0, "2x,b0"),
+                        (None, None), (None, 3), (None, 0),
+                        (3, 5), (3, 3), (3, 0),
+                        (4, 5), (4, 3), (4, 0),
+                        (2, 3), (2, 0),
                     ]
-                    progress = st.progress(0)
-                    status = st.empty()
-                    solved = False
-                    for i, (s, b, lbl) in enumerate(combos):
-                        progress.progress((i+1)/len(combos))
-                        status.text(f"{L['trying']}: {lbl}...")
-                        res, info = solve_maze(img_bytes,
-                            manual_start=points[0], manual_end=points[1],
-                            override_scale=s, override_blur=b)
-                        if res is not None:
-                            st.session_state.manual_result = res
-                            st.session_state.manual_info = L["success"]
-                            status.empty(); progress.empty()
-                            solved = True; st.rerun(); break
-                    if not solved:
-                        status.empty(); progress.empty()
+                    with st.spinner(L["manual_solving"]):
+                        solved = False
+                        for s, b in combos:
+                            res, info = solve_maze(img_bytes,
+                                manual_start=points[0], manual_end=points[1],
+                                override_scale=s, override_blur=b)
+                            if res is not None:
+                                st.session_state.manual_result = res
+                                st.session_state.manual_info = L["success"]
+                                solved = True; break
+                    if solved:
+                        st.rerun()
+                    else:
                         st.error(L["fail_all"])
