@@ -218,7 +218,7 @@ else:
                         _, buf = cv2.imencode('.png', st.session_state.manual_result)
                         st.download_button(L["download"], buf.tobytes(), f"solved_{uploaded.name}", "image/png", use_container_width=True)
                     with bc3:
-                        if st.button("🔄 다시", use_container_width=True):
+                        if st.button(L["retry_btn"], use_container_width=True):
                             st.session_state.points = []
                             st.session_state.last_click = None
                             st.session_state.manual_result = None
@@ -297,7 +297,7 @@ else:
                             override_scale=s, override_blur=b)
                         if res is not None:
                             st.session_state.manual_result = res
-                            st.session_state.manual_info = "미로 풀이 완료!"
+                            st.session_state.manual_info = L["success"]
                             status.empty(); progress.empty()
                             solved = True; st.rerun(); break
                     if not solved:
