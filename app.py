@@ -20,21 +20,102 @@ div[data-testid="stHorizontalBlock"] button {
 
 </style>
 """, unsafe_allow_html=True)
-st.title("🧩 미로 풀이기")
+# 다국어 지원
+LANG = {
+    "ko": {
+        "title": "🧩 미로 풀이기",
+        "mode_solve": "🖼️ 미로 풀기",
+        "mode_gen": "🎲 미로 생성",
+        "mode_select": "모드 선택",
+        "upload": "미로 이미지 업로드",
+        "upload_desc": "미로 이미지를 업로드하면 자동으로 풀어줍니다.",
+        "gen_title": "미로 생성",
+        "gen_w": "가로", "gen_h": "세로",
+        "gen_cells": "미로 셀",
+        "gen_btn": "🎲 미로 생성",
+        "gen_generating": "미로 생성 중...",
+        "solve_btn": "🚀 풀기",
+        "solving": "풀이 중...",
+        "auto_solving": "자동 풀이 중...",
+        "success": "✅ 미로 풀이 완료!",
+        "fail_auto": "자동 풀이 실패",
+        "fail_all": "❌ 모든 조합 실패. 초기화 후 다른 점을 찍어보세요.",
+        "fail_solve": "풀이 실패",
+        "download": "📥 다운로드",
+        "download_orig": "📥 원본 다운로드",
+        "download_result": "📥 풀이 결과 다운로드",
+        "manual_btn": "🖱️ 수동",
+        "reset_btn": "🔄 초기화",
+        "retry_btn": "🔄 다시",
+        "click_start": "🟢 시작점을 클릭하세요",
+        "click_end": "🔴 끝점을 클릭하세요",
+        "start_ok": "🟢 시작점 ✓",
+        "ready": "🟢 시작점 ✓ ㅤㅤ 🔴 끝점 ✓ ㅤㅤ 준비 완료!",
+        "start_ok_click_end": "🟢 시작점 ✓ ㅤㅤ 🔴 끝점을 클릭하세요",
+        "auto_fail_manual": "자동 풀이 실패 → 🟢 시작점을 클릭하세요",
+        "already_solved": "⚠️ 이미 풀린 이미지 같아요. 원본 미로 이미지를 업로드하세요.",
+        "cant_read": "이미지를 읽을 수 없습니다.",
+        "trying": "시도",
+        "img_size": "이미지",
+        "lang_label": "🌐",
+    },
+    "en": {
+        "title": "🧩 Maze Solver",
+        "mode_solve": "🖼️ Solve Maze",
+        "mode_gen": "🎲 Generate Maze",
+        "mode_select": "Mode",
+        "upload": "Upload maze image",
+        "upload_desc": "Upload a maze image to solve automatically.",
+        "gen_title": "Generate Maze",
+        "gen_w": "Width", "gen_h": "Height",
+        "gen_cells": "Maze cells",
+        "gen_btn": "🎲 Generate",
+        "gen_generating": "Generating maze...",
+        "solve_btn": "🚀 Solve",
+        "solving": "Solving...",
+        "auto_solving": "Auto-solving...",
+        "success": "✅ Maze solved!",
+        "fail_auto": "Auto-solve failed",
+        "fail_all": "❌ All attempts failed. Reset and try different points.",
+        "fail_solve": "Solve failed",
+        "download": "📥 Download",
+        "download_orig": "📥 Download original",
+        "download_result": "📥 Download result",
+        "manual_btn": "🖱️ Manual",
+        "reset_btn": "🔄 Reset",
+        "retry_btn": "🔄 Retry",
+        "click_start": "🟢 Click start point",
+        "click_end": "🔴 Click end point",
+        "start_ok": "🟢 Start ✓",
+        "ready": "🟢 Start ✓ ㅤㅤ 🔴 End ✓ ㅤㅤ Ready!",
+        "start_ok_click_end": "🟢 Start ✓ ㅤㅤ 🔴 Click end point",
+        "auto_fail_manual": "Auto-solve failed → 🟢 Click start point",
+        "already_solved": "⚠️ This looks already solved. Upload the original maze.",
+        "cant_read": "Cannot read image.",
+        "trying": "Trying",
+        "img_size": "Image",
+        "lang_label": "🌐",
+    },
+}
 
-mode = st.radio("모드 선택", ["🖼️ 미로 풀기", "🎲 미로 생성"], horizontal=True)
+lang_choice = st.sidebar.selectbox("🌐", ["한국어", "English"], label_visibility="collapsed")
+L = LANG["ko"] if lang_choice == "한국어" else LANG["en"]
 
-if mode == "🎲 미로 생성":
-    st.subheader("미로 생성")
+st.title(L["title"])
+
+mode = st.radio(L["mode_select"], [L["mode_solve"], L["mode_gen"]], horizontal=True)
+
+if mode == L["mode_gen"]:
+    st.subheader(L["gen_title"])
     c1, c2 = st.columns(2)
     with c1:
-        maze_w = st.slider("가로", 10, 300, 50)
+        maze_w = st.slider(L["gen_w"], 10, 300, 50)
     with c2:
-        maze_h = st.slider("세로", 10, 300, 50)
-    st.caption(f"미로 셀: {2*maze_w+1} x {2*maze_h+1}")
+        maze_h = st.slider(L["gen_h"], 10, 300, 50)
+    st.caption(f"{L['gen_cells']}: {2*maze_w+1} x {2*maze_h+1}")
 
-    if st.button("🎲 미로 생성", type="primary"):
-        with st.spinner(f"{maze_w}x{maze_h} 미로 생성 중..."):
+    if st.button(L["gen_btn"], type="primary"):
+        with st.spinner(L["gen_generating"]):
             grid = create_maze(maze_w, maze_h)
             img_color = maze_to_image(grid, target_size=2000)
             _, buf = cv2.imencode('.png', img_color)
@@ -46,41 +127,41 @@ if mode == "🎲 미로 생성":
         if st.session_state.get("gen_result") is not None:
             res = st.session_state.gen_result
             st.image(cv2.cvtColor(res, cv2.COLOR_BGR2RGB), use_container_width=True)
-            st.success("✅ 미로 풀이 완료!")
+            st.success(L["success"])
             _, dl = cv2.imencode('.png', res)
-            st.download_button("📥 풀이 결과 다운로드", dl.tobytes(), "maze_solved.png", "image/png")
+            st.download_button(L["download_result"], dl.tobytes(), "maze_solved.png", "image/png")
         else:
             nparr = np.frombuffer(st.session_state.gen_img_bytes, np.uint8)
             gen_img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
             st.image(cv2.cvtColor(gen_img, cv2.COLOR_BGR2RGB), use_container_width=True)
             c1, c2 = st.columns(2)
             with c1:
-                if st.button("🚀 풀기", type="primary"):
-                    with st.spinner("풀이 중..."):
+                if st.button(L["solve_btn"], type="primary"):
+                    with st.spinner(L["solving"]):
                         res, info = solve_maze(st.session_state.gen_img_bytes)
                     if res is not None:
                         st.session_state.gen_result = res
                         st.session_state.gen_info = info
                         st.rerun()
                     else:
-                        st.error(f"풀이 실패: {info}")
+                        st.error(f"{L['fail_solve']}: {info}")
             with c2:
-                st.download_button("📥 원본 다운로드", st.session_state.gen_img_bytes, "maze.png", "image/png")
+                st.download_button(L["download_orig"], st.session_state.gen_img_bytes, "maze.png", "image/png")
 
 else:
-    st.caption("미로 이미지를 업로드하면 자동으로 풀어줍니다.")
-    uploaded = st.file_uploader("미로 이미지 업로드", type=["jpg", "jpeg", "png", "bmp"])
+    st.caption(L["upload_desc"])
+    uploaded = st.file_uploader(L["upload"], type=["jpg", "jpeg", "png", "bmp"])
 
     if uploaded:
         if "solved" in uploaded.name.lower() or "debug" in uploaded.name.lower():
-            st.error("⚠️ 이미 풀린 이미지 같아요. 원본 미로 이미지를 업로드하세요.")
+            st.error(L["already_solved"])
             st.stop()
 
         img_bytes = uploaded.read()
         nparr = np.frombuffer(img_bytes, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         if img is None:
-            st.error("이미지를 읽을 수 없습니다.")
+            st.error(L["cant_read"])
             st.stop()
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         h_orig, w_orig = img.shape[:2]
@@ -97,7 +178,7 @@ else:
             st.session_state.force_manual = False
 
         if not st.session_state.get("auto_tried"):
-            with st.spinner("자동 풀이 중..."):
+            with st.spinner(L["auto_solving"]):
                 result_img, info = solve_maze(img_bytes)
                 st.session_state.auto_tried = True
                 st.session_state.auto_result = result_img
@@ -106,10 +187,10 @@ else:
         if st.session_state.auto_result is not None and not st.session_state.get("force_manual"):
             bc1, bc2, bc3 = st.columns([4, 1.5, 1.5])
             with bc1:
-                st.success("✅ 미로 풀이 완료!")
+                st.success(L["success"])
             with bc2:
                 _, buf = cv2.imencode('.png', st.session_state.auto_result)
-                st.download_button("📥 다운로드", buf.tobytes(), f"solved_{uploaded.name}", "image/png", use_container_width=True)
+                st.download_button(L["download"], buf.tobytes(), f"solved_{uploaded.name}", "image/png", use_container_width=True)
             with bc3:
                 if st.button("🖱️ 수동모드", use_container_width=True):
                     st.session_state.force_manual = True
@@ -132,10 +213,10 @@ else:
                     # 풀이 성공
                     bc1, bc2, bc3 = st.columns([5, 1.5, 1.5])
                     with bc1:
-                        st.success("✅ " + st.session_state.get("manual_info", "미로 풀이 완료!"))
+                        st.success(L["success"])
                     with bc2:
                         _, buf = cv2.imencode('.png', st.session_state.manual_result)
-                        st.download_button("📥 다운로드", buf.tobytes(), f"solved_{uploaded.name}", "image/png", use_container_width=True)
+                        st.download_button(L["download"], buf.tobytes(), f"solved_{uploaded.name}", "image/png", use_container_width=True)
                     with bc3:
                         if st.button("🔄 다시", use_container_width=True):
                             st.session_state.points = []
@@ -146,25 +227,25 @@ else:
                     # 점 2개 찍음 → 풀기/초기화
                     bc1, bc2, bc3 = st.columns([5, 1.5, 1.5])
                     with bc1:
-                        st.info("🟢 시작점 ✓ ㅤㅤ 🔴 끝점 ✓ ㅤㅤ 준비 완료!")
+                        st.info(L["ready"])
                     with bc2:
-                        solve_clicked = st.button("🚀 풀기", type="primary", use_container_width=True)
+                        solve_clicked = st.button(L["solve_btn"], type="primary", use_container_width=True)
                     with bc3:
-                        if st.button("🔄 초기화", use_container_width=True):
+                        if st.button(L["reset_btn"], use_container_width=True):
                             st.session_state.points = []
                             st.session_state.last_click = None
                             st.rerun()
                 elif n_points == 1:
                     bc1, bc2 = st.columns([6, 1.5])
                     with bc1:
-                        st.warning("🟢 시작점 ✓ ㅤㅤ 🔴 끝점을 클릭하세요")
+                        st.warning(L["start_ok_click_end"])
                     with bc2:
-                        if st.button("🔄 초기화", use_container_width=True):
+                        if st.button(L["reset_btn"], use_container_width=True):
                             st.session_state.points = []
                             st.session_state.last_click = None
                             st.rerun()
                 else:
-                    st.warning("자동 풀이 실패 → 🟢 시작점을 클릭하세요")
+                    st.warning(L["auto_fail_manual"])
 
             # 이미지 표시
             if st.session_state.get("manual_result") is not None:
@@ -210,7 +291,7 @@ else:
                     solved = False
                     for i, (s, b, lbl) in enumerate(combos):
                         progress.progress((i+1)/len(combos))
-                        status.text(f"시도: {lbl}...")
+                        status.text(f"{L['trying']}: {lbl}...")
                         res, info = solve_maze(img_bytes,
                             manual_start=points[0], manual_end=points[1],
                             override_scale=s, override_blur=b)
@@ -221,4 +302,4 @@ else:
                             solved = True; st.rerun(); break
                     if not solved:
                         status.empty(); progress.empty()
-                        st.error("❌ 모든 조합 실패. 초기화 후 다른 점을 찍어보세요.")
+                        st.error(L["fail_all"])
