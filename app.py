@@ -17,18 +17,9 @@ div[data-testid="stHorizontalBlock"] button {
     padding-top: 14px !important;
     padding-bottom: 14px !important;
 }
-div[data-testid="stImage"] {
-    position: relative !important;
-}
-div[data-testid="stImage"] button[title="View fullscreen"] {
-    position: absolute !important;
-    top: 8px !important;
-    right: 8px !important;
-    z-index: 10 !important;
-    opacity: 0.6 !important;
-}
-div[data-testid="stImage"] button[title="View fullscreen"]:hover {
-    opacity: 1 !important;
+/* 전체화면 버튼 숨김 (다운로드 버튼으로 대체) */
+button[title="View fullscreen"] {
+    display: none !important;
 }
 </style>
 """, unsafe_allow_html=True)
