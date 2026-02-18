@@ -17,8 +17,9 @@ div[data-testid="stHorizontalBlock"] button {
     padding-top: 14px !important;
     padding-bottom: 14px !important;
 }
-/* 전체화면 버튼 숨김 (다운로드 버튼으로 대체) */
-button[title="View fullscreen"] {
+/* 이미지 전체화면 버튼 숨김 */
+div[data-testid="stImage"] button,
+div[data-testid="StyledFullScreenButton"] {
     display: none !important;
 }
 </style>
