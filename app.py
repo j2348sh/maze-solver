@@ -17,9 +17,21 @@ div[data-testid="stHorizontalBlock"] button {
     padding-top: 14px !important;
     padding-bottom: 14px !important;
 }
+div[data-testid="stImage"] {
+    position: relative !important;
+}
+div[data-testid="stImage"] button[title="View fullscreen"] {
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    z-index: 10 !important;
+    opacity: 0.6 !important;
+}
+div[data-testid="stImage"] button[title="View fullscreen"]:hover {
+    opacity: 1 !important;
+}
 </style>
 """, unsafe_allow_html=True)
-
 st.title("🧩 미로 풀이기")
 
 mode = st.radio("모드 선택", ["🖼️ 미로 풀기", "🎲 미로 생성"], horizontal=True)
