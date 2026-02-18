@@ -233,33 +233,8 @@ else:
                             st.session_state.manual_result = None
                             st.rerun()
                 elif n_points >= 2:
-                    if st.session_state.get("solving"):
-                        # 풀이 중 → 스피너 표시
-                        with st.spinner(L["manual_solving"]):
-                            combos = [
-                                (None, None), (None, 3), (None, 0),
-                                (3, 5), (3, 3), (3, 0),
-                                (4, 5), (4, 3), (4, 0),
-                                (2, 3), (2, 0),
-                            ]
-                            solved = False
-                            for s, b in combos:
-                                res, info = solve_maze(img_bytes,
-                                    manual_start=points[0], manual_end=points[1],
-                                    override_scale=s, override_blur=b)
-                                if res is not None:
-                                    st.session_state.manual_result = res
-                                    st.session_state.manual_info = L["success"]
-                                    st.session_state.solving = False
-                                    solved = True; break
-                        if solved:
-                            st.rerun()
-                        else:
-                            st.session_state.solving = False
-                            st.session_state.solve_failed = True
-                            st.rerun()
-                    elif st.session_state.get("solve_failed"):
-                        # 실패 → 빨간 바
+                    if st.session_state.get("solve_failed"):
+                        # 실패 → 빨간 바 + 초기화
                         bc1, bc2 = st.columns([5, 1.5])
                         with bc1:
                             st.error(L["fail_all"])
@@ -269,6 +244,31 @@ else:
                                 st.session_state.last_click = None
                                 st.session_state.solve_failed = False
                                 st.rerun()
+                    elif st.session_state.get("solving"):
+                        # 풀이 중 → 파란 바에 로딩 메시지
+                        st.info("⏳ " + L["manual_solving"])
+                        combos = [
+                            (None, None), (None, 3), (None, 0),
+                            (3, 5), (3, 3), (3, 0),
+                            (4, 5), (4, 3), (4, 0),
+                            (2, 3), (2, 0),
+                        ]
+                        solved = False
+                        for s, b in combos:
+                            res, info = solve_maze(img_bytes,
+                                manual_start=points[0], manual_end=points[1],
+                                override_scale=s, override_blur=b)
+                            if res is not None:
+                                st.session_state.manual_result = res
+                                st.session_state.manual_info = L["success"]
+                                st.session_state.solving = False
+                                solved = True; break
+                        if solved:
+                            st.rerun()
+                        else:
+                            st.session_state.solving = False
+                            st.session_state.solve_failed = True
+                            st.rerun()
                     else:
                         # 준비 완료 → 파란 바 + 풀기/초기화
                         bc1, bc2, bc3 = st.columns([5, 1.5, 1.5])
