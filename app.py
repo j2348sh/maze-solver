@@ -88,7 +88,7 @@ LANG = {
         "download": "📥 Download",
         "download_orig": "📥 Download original",
         "download_result": "📥 Download result",
-        "manual_btn": "🖱️ Manual",
+        "manual_btn": "🖱️ Pick Points",
         "reset_btn": "🔄 Reset",
         "retry_btn": "🔄 Retry",
         "click_start": "🟢 Click start point",
