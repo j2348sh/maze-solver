@@ -85,11 +85,12 @@ else:
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         h_orig, w_orig = img.shape[:2]
 
-        if st.session_state.get("last_file") != uploaded.name:
+        file_key = f"{uploaded.name}_{len(img_bytes)}"
+        if st.session_state.get("last_file") != file_key:
             st.session_state.auto_tried = False
             st.session_state.auto_result = None
             st.session_state.auto_info = None
-            st.session_state.last_file = uploaded.name
+            st.session_state.last_file = file_key
             st.session_state.points = []
             st.session_state.last_click = None
             st.session_state.manual_result = None
