@@ -18,7 +18,8 @@ div[data-testid="stHorizontalBlock"] button {
     padding-bottom: 14px !important;
 }
 /* 사이드바 드롭다운 호버 색상 */
-div[data-baseweb="popover"] li:hover {
+div[data-baseweb="popover"] li:hover,
+div[data-baseweb="popover"] li[aria-selected="true"] {
     background-color: #333 !important;
 }
 
