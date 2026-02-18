@@ -14,8 +14,8 @@ st.set_page_config(page_title="🧩 Maze Solver", layout="centered")
 st.markdown("""
 <style>
 div[data-testid="stHorizontalBlock"] button {
-    padding-top: 12px !important;
-    padding-bottom: 12px !important;
+    padding-top: 14px !important;
+    padding-bottom: 14px !important;
 }
 </style>
 """, unsafe_allow_html=True)
