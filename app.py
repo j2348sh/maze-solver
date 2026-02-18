@@ -13,24 +13,24 @@ st.set_page_config(page_title="🧩 Maze Solver", layout="centered")
 # 상태 바 스타일
 st.markdown("""
 <style>
-/* 상태 박스 높이를 버튼과 일치 */
+/* 상태 바와 버튼 높이 통일 */
+div[data-testid="stHorizontalBlock"] {
+    align-items: stretch !important;
+}
 div[data-testid="stHorizontalBlock"] div[data-testid="stAlert"] {
-    padding: 10px 16px !important;
     margin: 0 !important;
-    min-height: 42px !important;
     display: flex !important;
     align-items: center !important;
+    height: 100% !important;
+    box-sizing: border-box !important;
 }
-div[data-testid="stHorizontalBlock"] div[data-testid="stAlert"] p {
-    margin: 0 !important;
-    line-height: 1.2 !important;
+div[data-testid="stHorizontalBlock"] div[data-testid="stAlert"] > div {
+    width: 100% !important;
 }
-/* 버튼 상단 마진 제거 */
-div[data-testid="stHorizontalBlock"] button {
-    margin-top: 0 !important;
-}
-div[data-testid="stHorizontalBlock"] div[data-testid="stDownloadButton"] {
-    margin-top: 0 !important;
+div[data-testid="stHorizontalBlock"] button,
+div[data-testid="stHorizontalBlock"] div[data-testid="stDownloadButton"] button {
+    height: 100% !important;
+    min-height: 52px !important;
 }
 </style>
 """, unsafe_allow_html=True)
