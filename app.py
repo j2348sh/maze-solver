@@ -93,6 +93,7 @@ else:
             st.session_state.points = []
             st.session_state.last_click = None
             st.session_state.manual_result = None
+            st.session_state.force_manual = False
 
         if not st.session_state.get("auto_tried"):
             with st.spinner("자동 풀이 중..."):
@@ -101,13 +102,21 @@ else:
                 st.session_state.auto_result = result_img
                 st.session_state.auto_info = info
 
-        if st.session_state.auto_result is not None:
-            bc1, bc2 = st.columns([5, 1.5])
+        if st.session_state.auto_result is not None and not st.session_state.get("force_manual"):
+            bc1, bc2, bc3 = st.columns([4, 1.5, 1.5])
             with bc1:
                 st.success("✅ 미로 풀이 완료!")
             with bc2:
                 _, buf = cv2.imencode('.png', st.session_state.auto_result)
                 st.download_button("📥 다운로드", buf.tobytes(), f"solved_{uploaded.name}", "image/png", use_container_width=True)
+            with bc3:
+                if st.button("🖱️ 수동", use_container_width=True):
+                    st.session_state.force_manual = True
+                    st.session_state.auto_result = None
+                    st.session_state.points = []
+                    st.session_state.last_click = None
+                    st.session_state.manual_result = None
+                    st.rerun()
             result_rgb = cv2.cvtColor(st.session_state.auto_result, cv2.COLOR_BGR2RGB)
             st.image(result_rgb, use_container_width=True)
         else:
