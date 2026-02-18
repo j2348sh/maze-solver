@@ -110,7 +110,7 @@ else:
                 _, buf = cv2.imencode('.png', st.session_state.auto_result)
                 st.download_button("📥 다운로드", buf.tobytes(), f"solved_{uploaded.name}", "image/png", use_container_width=True)
             with bc3:
-                if st.button("🖱️ 수동", use_container_width=True):
+                if st.button("🖱️ 수동모드", use_container_width=True):
                     st.session_state.force_manual = True
                     st.session_state.auto_result = None
                     st.session_state.points = []
