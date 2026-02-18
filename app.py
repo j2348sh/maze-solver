@@ -102,11 +102,14 @@ else:
                 st.session_state.auto_info = info
 
         if st.session_state.auto_result is not None:
+            bc1, bc2 = st.columns([5, 1.5])
+            with bc1:
+                st.success("✅ 미로 풀이 완료!")
+            with bc2:
+                _, buf = cv2.imencode('.png', st.session_state.auto_result)
+                st.download_button("📥 다운로드", buf.tobytes(), f"solved_{uploaded.name}", "image/png", use_container_width=True)
             result_rgb = cv2.cvtColor(st.session_state.auto_result, cv2.COLOR_BGR2RGB)
             st.image(result_rgb, use_container_width=True)
-            st.success("✅ 미로 풀이 완료!")
-            _, buf = cv2.imencode('.png', st.session_state.auto_result)
-            st.download_button("📥 결과 다운로드", buf.tobytes(), f"solved_{uploaded.name}", "image/png")
         else:
             # 수동 모드
             points = st.session_state.get("points", [])
