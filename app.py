@@ -9,6 +9,22 @@ from maze_solver import solve_maze
 from maze_generator import create_maze, maze_to_image
 
 st.set_page_config(page_title="🧩 Maze Solver", layout="centered")
+
+# 상태 바 스타일
+st.markdown("""
+<style>
+.status-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; border-radius: 8px; margin: 8px 0; width: 100%;
+}
+.status-bar.warning { background: #5c4b00; color: #ffd43b; }
+.status-bar.info { background: #1a3a5c; color: #74c0fc; }
+.status-bar.success { background: #1a4a2e; color: #69db7c; }
+.status-bar.error { background: #5c1a1a; color: #ff8787; }
+.status-bar .text { flex: 1; font-size: 14px; }
+</style>
+""", unsafe_allow_html=True)
+
 st.title("🧩 미로 풀이기")
 
 mode = st.radio("모드 선택", ["🖼️ 미로 풀기", "🎲 미로 생성"], horizontal=True)
@@ -57,7 +73,7 @@ if mode == "🎲 미로 생성":
                 st.download_button("📥 원본 다운로드", st.session_state.gen_img_bytes, "maze.png", "image/png")
 
 else:
-    st.caption("미로 이미지를 업로드하면 자동으로 풀어줍니다. 실패 시 시작/끝점을 클릭하세요.")
+    st.caption("미로 이미지를 업로드하면 자동으로 풀어줍니다.")
     uploaded = st.file_uploader("미로 이미지 업로드", type=["jpg", "jpeg", "png", "bmp"])
 
     if uploaded:
@@ -97,52 +113,56 @@ else:
             _, buf = cv2.imencode('.png', st.session_state.auto_result)
             st.download_button("📥 결과 다운로드", buf.tobytes(), f"solved_{uploaded.name}", "image/png")
         else:
-            # 수동 모드: 상단에 상태 + 버튼 배치
-            if st.session_state.get("manual_result") is not None:
-                # 풀이 성공 상태
-                col_msg, col_btn1, col_btn2 = st.columns([3, 1, 1])
-                with col_msg:
-                    st.success(f"✅ {st.session_state.get('manual_info', '')}")
-                with col_btn1:
-                    _, buf = cv2.imencode('.png', st.session_state.manual_result)
-                    st.download_button("📥 다운로드", buf.tobytes(), f"solved_{uploaded.name}", "image/png")
-                with col_btn2:
-                    if st.button("🔄 다시"):
-                        st.session_state.points = []
-                        st.session_state.last_click = None
-                        st.session_state.manual_result = None
-                        st.rerun()
-                res_rgb = cv2.cvtColor(st.session_state.manual_result, cv2.COLOR_BGR2RGB)
-                st.image(res_rgb, use_container_width=True)
-            else:
-                # 풀이 전 상태
-                points = st.session_state.get("points", [])
-                n_points = len(points)
+            # 수동 모드
+            points = st.session_state.get("points", [])
+            n_points = len(points)
 
-                # 상단 바: 상태 메시지 + 버튼
-                if n_points < 2:
-                    label = "🟢 시작점 클릭" if n_points == 0 else "🔴 끝점 클릭"
-                    col_msg, col_btn = st.columns([4, 1])
-                    with col_msg:
-                        st.warning(f"자동 실패 → 수동 모드 | {label}")
-                    with col_btn:
-                        if n_points > 0 and st.button("🔄 초기화"):
+            # 통합 상태 바 (container 안에 텍스트 + 버튼)
+            bar = st.container()
+            with bar:
+                if st.session_state.get("manual_result") is not None:
+                    # 풀이 성공
+                    bc1, bc2, bc3 = st.columns([5, 1.5, 1.5])
+                    with bc1:
+                        st.success(f"✅ {st.session_state.get('manual_info', '')}")
+                    with bc2:
+                        _, buf = cv2.imencode('.png', st.session_state.manual_result)
+                        st.download_button("📥 다운로드", buf.tobytes(), f"solved_{uploaded.name}", "image/png", use_container_width=True)
+                    with bc3:
+                        if st.button("🔄 다시", use_container_width=True):
+                            st.session_state.points = []
+                            st.session_state.last_click = None
+                            st.session_state.manual_result = None
+                            st.rerun()
+                elif n_points >= 2:
+                    # 점 2개 찍음 → 풀기/초기화
+                    bc1, bc2, bc3 = st.columns([5, 1.5, 1.5])
+                    with bc1:
+                        st.info("🟢 시작점 ✓  🔴 끝점 ✓  준비 완료!")
+                    with bc2:
+                        solve_clicked = st.button("🚀 풀기", type="primary", use_container_width=True)
+                    with bc3:
+                        if st.button("🔄 초기화", use_container_width=True):
+                            st.session_state.points = []
+                            st.session_state.last_click = None
+                            st.rerun()
+                elif n_points == 1:
+                    bc1, bc2 = st.columns([6, 1.5])
+                    with bc1:
+                        st.warning("🟢 시작점 ✓  🔴 끝점을 클릭하세요")
+                    with bc2:
+                        if st.button("🔄 초기화", use_container_width=True):
                             st.session_state.points = []
                             st.session_state.last_click = None
                             st.rerun()
                 else:
-                    col_msg, col_btn1, col_btn2 = st.columns([3, 1, 1])
-                    with col_msg:
-                        st.info(f"🟢 {points[0]} → 🔴 {points[1]}")
-                    with col_btn1:
-                        solve_clicked = st.button("🚀 풀기", type="primary")
-                    with col_btn2:
-                        if st.button("🔄 초기화"):
-                            st.session_state.points = []
-                            st.session_state.last_click = None
-                            st.rerun()
+                    st.warning("자동 풀이 실패 → 🟢 시작점을 클릭하세요")
 
-                # 이미지 (클릭 가능)
+            # 이미지 표시
+            if st.session_state.get("manual_result") is not None:
+                res_rgb = cv2.cvtColor(st.session_state.manual_result, cv2.COLOR_BGR2RGB)
+                st.image(res_rgb, use_container_width=True)
+            else:
                 display_w = min(700, w_orig)
                 scale_d = display_w / w_orig
                 display_h = int(h_orig * scale_d)
@@ -152,13 +172,11 @@ else:
                     color = (0, 255, 0) if i == 0 else (0, 0, 255)
                     r = max(5, w_orig // 100)
                     cv2.circle(preview, (px, py), r, color, -1)
-                    label_t = "S" if i == 0 else "E"
-                    cv2.putText(preview, label_t, (px+r+2, py+4),
+                    cv2.putText(preview, "S" if i==0 else "E", (px+r+2, py+4),
                                 cv2.FONT_HERSHEY_SIMPLEX, max(0.4, w_orig/2000), color, 2)
                 pil_preview = Image.fromarray(cv2.cvtColor(preview, cv2.COLOR_BGR2RGB)).resize((display_w, display_h))
 
                 coords = streamlit_image_coordinates(pil_preview, key=f"click_{n_points}")
-
                 if coords and coords.get("x") is not None and coords.get("y") is not None:
                     click_x = int(coords["x"] / scale_d)
                     click_y = int(coords["y"] / scale_d)
