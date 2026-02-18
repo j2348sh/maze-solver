@@ -13,15 +13,12 @@ st.set_page_config(page_title="🧩 Maze Solver", layout="centered")
 # 상태 바 스타일
 st.markdown("""
 <style>
-.status-bar {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 16px; border-radius: 8px; margin: 8px 0; width: 100%;
+/* 버튼 컬럼 세로 정렬 */
+div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
-.status-bar.warning { background: #5c4b00; color: #ffd43b; }
-.status-bar.info { background: #1a3a5c; color: #74c0fc; }
-.status-bar.success { background: #1a4a2e; color: #69db7c; }
-.status-bar.error { background: #5c1a1a; color: #ff8787; }
-.status-bar .text { flex: 1; font-size: 14px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -138,7 +135,7 @@ else:
                     # 점 2개 찍음 → 풀기/초기화
                     bc1, bc2, bc3 = st.columns([5, 1.5, 1.5])
                     with bc1:
-                        st.info("🟢 시작점 ✓  🔴 끝점 ✓  준비 완료!")
+                        st.info("🟢 시작점 ✓ ㅤㅤ 🔴 끝점 ✓ ㅤㅤ 준비 완료!")
                     with bc2:
                         solve_clicked = st.button("🚀 풀기", type="primary", use_container_width=True)
                     with bc3:
@@ -149,7 +146,7 @@ else:
                 elif n_points == 1:
                     bc1, bc2 = st.columns([6, 1.5])
                     with bc1:
-                        st.warning("🟢 시작점 ✓  🔴 끝점을 클릭하세요")
+                        st.warning("🟢 시작점 ✓ ㅤㅤ 🔴 끝점을 클릭하세요")
                     with bc2:
                         if st.button("🔄 초기화", use_container_width=True):
                             st.session_state.points = []
